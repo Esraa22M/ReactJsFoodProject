@@ -18,5 +18,5 @@
 work with team
   -git pull origin main 
 
-
-   
+//use joi for validation ==>npm i joi-browser
+//use axis for post data 

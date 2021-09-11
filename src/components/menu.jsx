@@ -2,6 +2,7 @@ import React from "react";
 import Cart from "./cart";
 import Pagination from "./pagination";
 import _ from "lodash";
+import Filter from "./filter";
 class Menu extends React.Component {
   render() {
     //Pagination logic
@@ -10,21 +11,22 @@ class Menu extends React.Component {
     const startIndex = (this.props.activePage - 1) * this.props.pageSize;
     const endIndex = startIndex + this.props.pageSize;
     //showed products
-    const showedProducts = this.props.products.slice(startIndex, endIndex);
+    let filteredProducts = this.props.products;
+    if(this.props.activeFilter)
+      filteredProducts = this.props.products.filter(product=>product.typeId === this.props.activeFilter)
+    console.log(filteredProducts)
+    const showedProducts = filteredProducts.slice(startIndex, endIndex);
+
     return (
       <React.Fragment>
         <h1>Menu</h1>
         <div className="row">
           <div className="col-3">
-            <ul className="list-group">
-              <li class="list-group-item active" aria-current="true">
-                An active item
-              </li>
-              <li className="list-group-item">A second item</li>
-              <li className="list-group-item">A third item</li>
-              <li className="list-group-item">A fourth item</li>
-              <li className="list-group-item">And a fifth one</li>
-            </ul>
+            <Filter
+              types={this.props.types}
+              activeFilter={this.props.activeFilter}
+              onFilterChange={this.props.onFilterChange}
+            />
           </div>
           <div className="col">
             {" "}
@@ -51,11 +53,11 @@ class Menu extends React.Component {
                 ))}
               </tbody>
             </table>
-            <Pagination
+           {(filteredProducts.length > this.props.pageSize) &&<Pagination
               pageCount={this.props.products.length / this.props.pageSize}
               activePage={this.props.activePage}
               onPageChange={this.props.onPageChange}
-            />
+            />}
           </div>
         </div>
       </React.Fragment>

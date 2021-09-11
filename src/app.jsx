@@ -10,19 +10,65 @@ import Home from "./components/home";
 import Users from "./components/users";
 import NotFound from "./components/notFound";
 import Menu from "./components/menu";
+import Login from "./components/login";
+import Admin from "./components/admin";
+import ProductForm from "./components/productForm";
 class app extends React.Component {
   state = {
-    products: [
-      { id: 1, name: "Burger", price: 30, count: 0, isInCart: false },
-      { id: 2, name: "Fries", price: 20, count: 0, isInCart: false },
-      { id: 3, name: "Cola", price: 10, count: 0, isInCart: false },
-      { id: 4, name: "Large Burger", price: 40, count: 0, isInCart: false },
-      { id: 5, name: "Large Cola", price: 25, count: 0, isInCart: false },
-      { id: 6, name: "Large Fries", price: 15, count: 0, isInCart: false },
+    products: [],
+    types: [
+      { id: 0, name: "All" },
+
+      { id: 1, name: "Burger" },
+      { id: 2, name: "Fries" },
+      { id: 3, name: "Cola" },
     ],
+    // products: [
+    //   {
+    //     id: 1,
+    //     typeId: 1,
+    //     name: "Burger",
+    //     price: 30,
+    //     count: 0,
+    //     isInCart: false,
+    //   },
+    //   { id: 2, typeId: 2, name: "Fries", price: 20, count: 0, isInCart: false },
+    //   { id: 3, typeId: 3, name: "Cola", price: 10, count: 0, isInCart: false },
+    //   {
+    //     id: 4,
+    //     typeId: 1,
+    //     name: "Large Burger",
+    //     price: 40,
+    //     count: 0,
+    //     isInCart: false,
+    //   },
+    //   {
+    //     id: 5,
+    //     typeId: 2,
+    //     name: "Large Cola",
+    //     price: 25,
+    //     count: 0,
+    //     isInCart: false,
+    //   },
+    //   {
+    //     id: 6,
+    //     typeId: 3,
+    //     name: "Large Fries",
+    //     price: 15,
+    //     count: 0,
+    //     isInCart: false,
+    //   },
+    // ],
+
     pageSize: 4,
     activePage: 1,
+    activeFilter: 0,
   };
+  componentDidMount() {
+    fetch("http://localhost:3000/products")
+      .then((result) => result.json())
+      .then((data) => this.setState({ products: data }));
+  }
   handleDelete = (product) => {
     //colne state
     //edit state
@@ -36,6 +82,12 @@ class app extends React.Component {
     const index = products.indexOf(product);
     products[index] = { ...products[index] };
     products[index].count++;
+    this.setState({ products });
+  };
+  handleAdd = (product) => {
+    const products = [...this.state.products];
+
+    products.unshift(product);
     this.setState({ products });
   };
   handleReset = () => {
@@ -59,8 +111,11 @@ class app extends React.Component {
     //edit
     //setState
   };
-  handlePageChange =page=> {
-    this.setState({activePage:page})
+  handlePageChange = (page) => {
+    this.setState({ activePage: page });
+  };
+  handleFilterChange = (type) => {
+    this.setState({ activeFilter: type.id, activePage: 1 });
   };
   render() {
     return (
@@ -89,12 +144,31 @@ class app extends React.Component {
                   pageSize={this.state.pageSize}
                   activePage={this.state.activePage}
                   onPageChange={this.handlePageChange}
+                  types={this.state.types}
+                  onFilterChange={this.handleFilterChange}
+                  activeFilter={this.state.activeFilter}
                 />
               )}
             />
 
             {/*/:id is a router parameter which is dynamic */}
+            <Route
+              path="/products/add"
+              render={(props) => (
+                <ProductForm types={this.state.types} onAdd={this.handleAdd} {...props} />
+              )}
+            />
+
             <Route path="/user" component={Users} />
+
+            <Route
+              path="/admin"
+              render={(props) => (
+                <Admin {...props} products={this.state.products} />
+              )}
+            />
+
+            <Route path="/login" component={Login} />
 
             <Route
               path="/cart"
@@ -105,7 +179,7 @@ class app extends React.Component {
                   fun={{
                     onIncrement: this.handleIncrement,
                     onReset: this.handleReset,
-                    onDelete: this.handleDelete,
+                    onDelete: this.handleCartChange,
                   }}
                 />
               )}
